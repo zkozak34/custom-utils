@@ -5,7 +5,7 @@ class Matrix {
 
     this.data = Array(rows)
       .fill([])
-      .map((row) => (row = Array(this.cols).fill(0)));
+      .map((row) => (row = Array(this.cols).fill(0.5)));
   }
 
   randomize() {
@@ -15,7 +15,7 @@ class Matrix {
   add(n) {
     if (n instanceof Matrix) {
       if (this.rows !== n.rows || this.cols !== n.cols) {
-        console.error("Columns count of A should be equal to Rows count of B.");
+        console.error("Add: Columns count of A should be equal to Rows count of B.");
         return;
       }
       this.map((val, x, y) => val + n.data[x][y]);
@@ -27,7 +27,7 @@ class Matrix {
   subtract(n) {
     if (n instanceof Matrix) {
       if (this.rows !== n.rows || this.cols !== n.cols) {
-        console.error("Columns count of A should be equal to Rows count of B.");
+        console.error("Subtract: Columns count of A should be equal to Rows count of B.");
         return;
       }
       this.map((val, x, y) => val - n.data[x][y]);
@@ -36,17 +36,33 @@ class Matrix {
     }
   }
 
+  static subtract(a, b) {
+    if (!(a instanceof Matrix || b instanceof Matrix)) {
+      console.error("Static Subtract: A and B should be instance of Matrix");
+      return;
+    }
+    if (a.rows !== b.rows || a.cols !== b.cols) {
+      console.error("Static Subtract: Rows and Columns count of A should be equal to Rows and Columns count of B.");
+      return;
+    }
+    return new Matrix(a.rows, a.cols).map((val, x, y) => (val = a.data[x][y] - b.data[x][y]));
+  }
+
   multiply(n) {
-    this.map((val, x, y) => val * n);
+    if (n instanceof Matrix) {
+      this.map((val, x, y) => (val *= n.data[x][y]));
+    } else {
+      this.map((val, x, y) => val * n);
+    }
   }
 
   static multiply(a, b) {
     if (!(a instanceof Matrix || b instanceof Matrix)) {
-      console.error("A and B should be instance of Matrix");
+      console.error("Static Multiply: A and B should be instance of Matrix");
       return;
     }
     if (a.cols !== b.rows) {
-      console.error("Columns count of A should be equal to Rows count of B.");
+      console.error("Static Multiply: Columns count of A should be equal to Rows count of B.");
       return;
     }
     return new Matrix(a.rows, b.cols).map((val, x, y) => {
@@ -63,6 +79,16 @@ class Matrix {
     for (let x = 0; x < this.rows; x++) {
       for (let y = 0; y < this.cols; y++) {
         result.data[y][x] = this.data[x][y];
+      }
+    }
+    return result;
+  }
+
+  static transpose(matrix) {
+    const result = new Matrix(matrix.cols, matrix.rows);
+    for (let x = 0; x < matrix.rows; x++) {
+      for (let y = 0; y < matrix.cols; y++) {
+        result.data[y][x] = matrix.data[x][y];
       }
     }
     return result;
@@ -109,7 +135,7 @@ class Matrix {
 
   static fromArray(arr) {
     if (typeof arr !== "object") {
-      console.error("Type of arr parameter should be Array.");
+      console.error("Static FromArray: Type of arr parameter should be Array.");
       return;
     }
     if (typeof arr[0] === "number") {
